@@ -13,6 +13,11 @@ const client = new Client ({ intents: GatewayIntentBits.Guilds });
 // Create client command
 client.commands = new Collection;
 
+// Create client coolsdown
+// Structure of the cooldowns: <key(command name) - value(A: Collection)>
+// A's Structure: <key(user ID) - value(timestap when invoke the command)>
+client.cooldowns = new Collection;
+
 // Adding commands to the client commands collection
 const foldersPath = path.join(__dirname, '/commands');
 const commandFolders = fs.readdirSync(foldersPath);
@@ -23,7 +28,6 @@ for (const folder of commandFolders) {
 	for (const file of commandFiles) {
 		const filePath = path.join(commandPath, file);
 		const command = require(filePath);
-
 
 		// Set new item in the collection, set the key as the name in "data" and the value is the module exported by the file
 		if ('data' in command && 'execute' in command) {
@@ -44,11 +48,12 @@ for (const eventFile of eventsFolder) {
 	const event = require(filePath);
 
 	if (event.once) {
+		// using callback function 
 		client.once(event.name, (...args) => event.execute(...args));
 	}
 	else {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
 }
-// Log in to Discord with your client's token
+// Log in to Discord with client's token
 client.login(token);
