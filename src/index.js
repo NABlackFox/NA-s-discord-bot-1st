@@ -2,17 +2,27 @@
 require('dotenv').config();
 
 // Require necessary discord.js classes
+const { MongoClient } = require('mongodb');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Player } = require('discord-player');
+const { DefaultExtractors } = require('@discord-player/extractor');
 const token = process.env.TOKEN;
 const fs = require('node:fs');
 const path = require('node:path');
-const { MongoClient } = require('mongodb');
+
 
 // Create new client
-const client = new Client ({ intents: GatewayIntentBits.Guilds });
+const client = new Client ({ intents: [
+	GatewayIntentBits.Guilds, 
+	GatewayIntentBits.GuildVoiceStates,
+] 
+ });
 
 // Create client command
 client.commands = new Collection;
+
+// Create new Player for music bot
+const player = new Player(client);
 
 // Create client coolsdown
 // Structure of the cooldowns: <key(command name) - value(A: Collection)>
@@ -65,11 +75,22 @@ async function databaseConnect() {
 		await mongodb.connect();
 		console.log('Successfully connect to the database');
 	} catch (error) {
-		console.log('Can not connect to the database');
+		console.error('Can not connect to the database');
+		console.error(error);
+	}
+}
+
+async function musicPlayerExtract() {
+	try {
+		await player.extractors.loadMulti(DefaultExtractors);
+		console.log('Extractor finished');
+	} catch (error) {
+		console.error('Fail to use extractor');
 		console.error(error);
 	}
 }
 
 databaseConnect();
+musicPlayerExtract();
 // Log in to Discord with client's token
 client.login(token);
