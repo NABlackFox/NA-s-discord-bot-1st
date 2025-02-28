@@ -13,16 +13,17 @@ const path = require('node:path');
 
 // Create new client
 const client = new Client ({ intents: [
-	GatewayIntentBits.Guilds, 
+	GatewayIntentBits.Guilds,
 	GatewayIntentBits.GuildVoiceStates,
-] 
- });
+],
+});
 
 // Create client command
 client.commands = new Collection;
 
 // Create new Player for music bot
-const player = new Player(client);
+// const player = new Player(client);
+client.player = new Player(client);
 
 // Create client coolsdown
 // Structure of the cooldowns: <key(command name) - value(A: Collection)>
@@ -59,7 +60,7 @@ for (const eventFile of eventsFolder) {
 	const event = require(filePath);
 
 	if (event.once) {
-		// using callback function 
+		// using callback function
 		client.once(event.name, (...args) => event.execute(...args));
 	}
 	else {
@@ -74,7 +75,8 @@ async function databaseConnect() {
 	try {
 		await mongodb.connect();
 		console.log('Successfully connect to the database');
-	} catch (error) {
+	}
+	catch (error) {
 		console.error('Can not connect to the database');
 		console.error(error);
 	}
@@ -82,9 +84,10 @@ async function databaseConnect() {
 
 async function musicPlayerExtract() {
 	try {
-		await player.extractors.loadMulti(DefaultExtractors);
+		await client.player.extractors.loadMulti(DefaultExtractors);
 		console.log('Extractor finished');
-	} catch (error) {
+	}
+	catch (error) {
 		console.error('Fail to use extractor');
 		console.error(error);
 	}
