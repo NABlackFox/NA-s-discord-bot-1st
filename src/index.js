@@ -5,10 +5,10 @@ require('dotenv').config();
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 
-const register = require('./ultility/deploy-command');
-const commandLoader = require('./ultility/load-command');
-const commandHandlerLoader = require('./ultility/load-command-handlers');
-const databaseConnect = require('./ultility/database-connect');
+const register = require('./ultility/deployCommands');
+const clientCommandLoader = require('./ultility/loadClientCommands');
+const clientEventLoader = require('./ultility/loadClientEvents');
+const databaseConnect = require('./ultility/databaseConnect');
 
 const token = process.env.TOKEN;
 
@@ -31,9 +31,9 @@ client.cooldowns = new Collection;
 	// Register commands to guild
 	await register.deploy();
 	// Load the commands to client object
-	await commandLoader.load(client);
+	await clientCommandLoader.load(client);
 	// Loand the command handlers to client object
-	await commandHandlerLoader.load(client);
+	await clientEventLoader.load(client);
 	// Connect to the database
 	await databaseConnect.connect();
 })();
