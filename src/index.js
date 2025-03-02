@@ -1,9 +1,9 @@
-// Require for dotenv
 require('dotenv').config();
 
-// Require necessary discord.js classes
-
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Player } = require('discord-player');
+const { DefaultExtractors } = require('@discord-player/extractor');
+const { useMainPlayer } = require('discord-player');
 
 const register = require('./ultility/deployCommands');
 const clientCommandLoader = require('./ultility/loadClientCommands');
@@ -19,14 +19,21 @@ const client = new Client ({ intents: [
 ],
 });
 
-// Create client command
 client.commands = new Collection;
-
-// Create client coolsdown
-// Structure of the cooldowns: <key(command name) - value(A: Collection)>
-// A's Structure: <key(user ID) - value(timestap when invoke the command)>
 client.cooldowns = new Collection;
 
+// Discord-player set up
+const player = new Player(client);
+
+async function loadPlayer() {
+	try {
+		await player.extractors.loadMulti(DefaultExtractors);
+	}
+	catch (error) {
+		console.error(error);
+	}
+}
+// Set up the bot
 (async () => {
 	// Register commands to guild
 	await register.deploy();
@@ -36,7 +43,10 @@ client.cooldowns = new Collection;
 	await clientEventLoader.load(client);
 	// Connect to the database
 	await databaseConnect.connect();
+
+	await loadPlayer();
+
+	// Log in to Discord with client's token
+	client.login(token);
 })();
 
-// Log in to Discord with client's token
-client.login(token);
